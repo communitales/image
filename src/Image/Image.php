@@ -216,6 +216,24 @@ class Image
     }
 
     /**
+     * Saves the image resource as PNG
+     *
+     * @param string $targetFilename
+     * @param int    $compression Quality between 0 and 9. -1 uses the zlib compression default, which is 6.
+     * @param bool   $saveAlpha   Keep full alpha transparency while saving
+     *
+     * @return bool
+     */
+    public function saveAsPng(string $targetFilename, int $compression = 9, bool $saveAlpha = false): bool
+    {
+        if ($saveAlpha) {
+            \imagesavealpha($this->resource, true);
+        }
+
+        return \imagepng($this->resource, $targetFilename, $compression);
+    }
+
+    /**
      * Returns with of the image in pixels
      *
      * @return int
