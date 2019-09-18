@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,6 +14,20 @@ use Communitales\Component\Image\Action\AdjustOrientationByExifAction;
 use Communitales\Component\Image\Filter\FilterInterface;
 use InvalidArgumentException;
 use RuntimeException;
+use function array_pop;
+use function exif_read_data;
+use function file_exists;
+use function imagecolorallocatealpha;
+use function imagecreatefromjpeg;
+use function imagecreatefrompng;
+use function imagecreatetruecolor;
+use function imageinterlace;
+use function imagejpeg;
+use function imagepng;
+use function imagesavealpha;
+use function imagesx;
+use function imagesy;
+use function sprintf;
 
 /**
  * Represents an image resource.
@@ -35,7 +49,7 @@ class Image
     private $filename;
 
     /**
-     * Create an adapte for a graphics resource.
+     * Create an adapter for a graphics resource.
      * See static create functions.
      *
      * @param resource $resource
@@ -58,8 +72,8 @@ class Image
      */
     public static function createFromFilename(string $filename): Image
     {
-        $nameSplit = \explode('.', $filename);
-        $extension = \array_pop($nameSplit);
+        $nameSplit = explode('.', $filename);
+        $extension = array_pop($nameSplit);
         switch ($extension) {
             case 'jpg':
             case 'jpeg':
@@ -82,18 +96,18 @@ class Image
      *
      * @param string $filename
      *
-     * @throws RuntimeException
      * @return Image
+     * @throws RuntimeException
      */
     public static function createFromPng(string $filename): Image
     {
-        if (!\file_exists($filename)) {
+        if (!file_exists($filename)) {
             throw new  RuntimeException(
-                \sprintf('The image was not found or is not readable: "%s"', $filename)
+                sprintf('The image was not found or is not readable: "%s"', $filename)
             );
         }
 
-        $resource = \imagecreatefrompng($filename);
+        $resource = imagecreatefrompng($filename);
 
         return new self($resource, $filename);
     }
@@ -104,18 +118,18 @@ class Image
      *
      * @param string $filename
      *
-     * @throws RuntimeException
      * @return Image
+     * @throws RuntimeException
      */
     public static function createFromJpeg(string $filename): Image
     {
-        if (!\file_exists($filename)) {
+        if (!file_exists($filename)) {
             throw new  RuntimeException(
-                \sprintf('The image was not found or is not readable: "%s"', $filename)
+                sprintf('The image was not found or is not readable: "%s"', $filename)
             );
         }
 
-        $resource = \imagecreatefromjpeg($filename);
+        $resource = imagecreatefromjpeg($filename);
         $image = new self($resource, $filename);
         $image->addAction(new AdjustOrientationByExifAction());
 
@@ -132,7 +146,7 @@ class Image
      */
     public static function createTrueColor(int $width, int $height): Image
     {
-        $resource = \imagecreatetruecolor($width, $height);
+        $resource = imagecreatetruecolor($width, $height);
 
         return new self($resource);
     }
@@ -144,9 +158,10 @@ class Image
      * @param int   $red
      * @param int   $green
      * @param int   $blue
-     * @param int   $alpha 0-127, 0 bedeutet deckend, 127 ist transparent
+     * @param int   $alpha A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely
+     *                     transparent.
      *
-     * @return int  A color identifier
+     * @return int  A color identifier or FALSE if the allocation failed.
      */
     public static function allocateColor(
         Image $image,
@@ -155,7 +170,7 @@ class Image
         int $blue,
         int $alpha = 0
     ): int {
-        return \imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
+        return imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
     }
 
     /**
@@ -167,7 +182,7 @@ class Image
     {
         $exif = [];
         if (!empty($this->filename)) {
-            $exif = \exif_read_data($this->filename);
+            $exif = exif_read_data($this->filename);
         }
         if ($exif === false) {
             $exif = [];
@@ -212,7 +227,7 @@ class Image
      */
     public function saveAsJpeg(string $targetFilename, int $quality = 98): bool
     {
-        return \imagejpeg($this->resource, $targetFilename, $quality);
+        return imagejpeg($this->resource, $targetFilename, $quality);
     }
 
     /**
@@ -227,10 +242,10 @@ class Image
     public function saveAsPng(string $targetFilename, int $compression = 9, bool $saveAlpha = false): bool
     {
         if ($saveAlpha) {
-            \imagesavealpha($this->resource, true);
+            imagesavealpha($this->resource, true);
         }
 
-        return \imagepng($this->resource, $targetFilename, $compression);
+        return imagepng($this->resource, $targetFilename, $compression);
     }
 
     /**
@@ -240,7 +255,7 @@ class Image
      */
     public function getWidth(): int
     {
-        return \imagesx($this->resource);
+        return imagesx($this->resource);
     }
 
     /**
@@ -250,7 +265,7 @@ class Image
      */
     public function getHeight(): int
     {
-        return \imagesy($this->resource);
+        return imagesy($this->resource);
     }
 
     /**
@@ -284,7 +299,7 @@ class Image
      */
     public function setInterlace(bool $boolean): Image
     {
-        \imageinterlace($this->resource, (int)$boolean);
+        imageinterlace($this->resource, (int)$boolean);
 
         return $this;
     }

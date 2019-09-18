@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,10 @@ namespace Communitales\Component\Image\Action;
 
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
+use function imagecopyresampled;
+use function imagecreatetruecolor;
+use function min;
+use function round;
 
 /**
  * Resize the image to a max size
@@ -50,9 +54,9 @@ class ResizeAction implements ActionInterface
 
         // Calculate real target size
         if ($keepAspectRatio) {
-            $factor = \min($width / $imageWidth, $height / $imageHeight);
-            $width = \round($imageWidth * $factor);
-            $height = \round($imageHeight * $factor);
+            $factor = min($width / $imageWidth, $height / $imageHeight);
+            $width = round($imageWidth * $factor);
+            $height = round($imageHeight * $factor);
         }
 
         // If the image already has the desired size, we are done.
@@ -61,8 +65,8 @@ class ResizeAction implements ActionInterface
         }
 
         // Now resize to the new image
-        $resizedResource = \imagecreatetruecolor($width, $height);
-        \imagecopyresampled($resizedResource, $resource, 0, 0, 0, 0, $width, $height, $imageWidth, $imageHeight);
+        $resizedResource = imagecreatetruecolor($width, $height);
+        imagecopyresampled($resizedResource, $resource, 0, 0, 0, 0, $width, $height, $imageWidth, $imageHeight);
 
         $image->setResource($resizedResource);
 

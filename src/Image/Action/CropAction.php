@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,10 @@ namespace Communitales\Component\Image\Action;
 
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
+use function imagecopy;
+use function imagecreatetruecolor;
+use function imagefilledrectangle;
+use function round;
 
 /**
  * Crop an image to specified size.
@@ -67,15 +71,15 @@ class CropAction implements ActionInterface
         $targetX = $this->getTargetPositionX($imageWidth, $width, $orientation);
         $targetY = $this->getTargetPositionY($imageHeight, $height, $orientation);
 
-        $cropedResource = \imagecreatetruecolor($width, $height);
+        $cropedResource = imagecreatetruecolor($width, $height);
 
         // If a fill color was added, then fill the new image
         if (isset($options[self::OPTION_COLOR]) && \is_int($options[self::OPTION_COLOR])) {
-            \imagefilledrectangle($cropedResource, 0, 0, $width, $height, $options[self::OPTION_COLOR]);
+            imagefilledrectangle($cropedResource, 0, 0, $width, $height, $options[self::OPTION_COLOR]);
         }
 
         // Crop the image
-        \imagecopy($cropedResource, $resource, $targetX, $targetY, 0, 0, $imageWidth, $imageHeight);
+        imagecopy($cropedResource, $resource, $targetX, $targetY, 0, 0, $imageWidth, $imageHeight);
 
         $image->setResource($cropedResource);
 
@@ -102,7 +106,7 @@ class CropAction implements ActionInterface
             case self::CROP_FROM_MIDDLE_TOP:
             case self::CROP_FROM_MIDDLE_MIDDLE:
             case self::CROP_FROM_MIDDLE_BOTTOM:
-                $result = (int)\round(($newWidth - $oldWidth) / 2);
+                $result = (int)round(($newWidth - $oldWidth) / 2);
                 break;
             case self::CROP_FROM_RIGHT_TOP:
             case self::CROP_FROM_RIGHT_MIDDLE:
@@ -128,28 +132,7 @@ class CropAction implements ActionInterface
      */
     private function getTargetPositionY(int $oldHeight, int $newHeight, int $orientation): int
     {
-        switch ($orientation) {
-            case self::CROP_FROM_LEFT_TOP:
-            case self::CROP_FROM_MIDDLE_TOP:
-            case self::CROP_FROM_RIGHT_TOP:
-                $result = 0;
-                break;
-            case self::CROP_FROM_LEFT_MIDDLE:
-            case self::CROP_FROM_MIDDLE_MIDDLE:
-            case self::CROP_FROM_RIGHT_MIDDLE:
-                $result = (int)\round(($newHeight - $oldHeight) / 2);
-                break;
-            case self::CROP_FROM_LEFT_BOTTOM:
-            case self::CROP_FROM_MIDDLE_BOTTOM:
-            case self::CROP_FROM_RIGHT_BOTTOM:
-                $result = $newHeight - $oldHeight;
-                break;
-            default:
-                $result = 0;
-                break;
-        }
-
-        return $result;
+        return $this->getTargetPositionX($oldHeight, $newHeight, $orientation);
     }
 
 }

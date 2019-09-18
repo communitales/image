@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -10,6 +10,9 @@
 namespace Communitales\Component\Image\Filter;
 
 use Communitales\Component\Image\Image;
+use function array_map;
+use function array_sum;
+use function imageconvolution;
 
 /**
  * Sharpen the image
@@ -52,10 +55,10 @@ class SharpenFilter implements FilterInterface
         $offset = 0;
 
         // calculate the sharpen divisor
-        $divisor = \array_sum(\array_map('array_sum', $sharpenMatrix));
+        $divisor = array_sum(array_map('array_sum', $sharpenMatrix));
 
         // apply the matrix
-        \imageconvolution($imageResource, $sharpenMatrix, $divisor, $offset);
+        imageconvolution($imageResource, $sharpenMatrix, $divisor, $offset);
 
         return true;
     }

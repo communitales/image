@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,10 @@ namespace Communitales\Component\Image\Action;
 
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
+use function imagecopy;
+use function imagecopymerge;
+use function imagecreatetruecolor;
+use function min;
 
 /**
  * Copy one image to another
@@ -42,7 +46,7 @@ class CopyAction implements ActionInterface
         $targetX = (int)$options[self::OPTION_TARGET_X];
         $targetY = (int)$options[self::OPTION_TARGET_Y];
         $opacity = (int)($options[self::OPTION_OPACITY] ?? 100);
-        $opacity = \min(100, max(0, $opacity));
+        $opacity = min(100, max(0, $opacity));
 
         return $this->imageCopyMergeAlpha(
             $image->getResource(),
@@ -90,15 +94,25 @@ class CopyAction implements ActionInterface
         int $percent
     ): bool {
         // creating a cut resource
-        $cut = \imagecreatetruecolor($sourceWidth, $sourceHeight);
+        $cut = imagecreatetruecolor($sourceWidth, $sourceHeight);
 
         // copying relevant section from background to the cut resource
-        \imagecopy($cut, $destinationImage, 0, 0, $destinationX, $destinationY, $sourceWidth, $sourceHeight);
+        imagecopy($cut, $destinationImage, 0, 0, $destinationX, $destinationY, $sourceWidth, $sourceHeight);
 
         // copying relevant section from watermark to the cut resource
-        \imagecopy($cut, $sourceImage, 0, 0, $sourceX, $sourceY, $sourceWidth, $sourceHeight);
+        imagecopy($cut, $sourceImage, 0, 0, $sourceX, $sourceY, $sourceWidth, $sourceHeight);
 
         // insert cut resource to destination image
-        return \imagecopymerge($destinationImage, $cut, $destinationX, $destinationY, 0, 0, $sourceWidth, $sourceHeight, $percent);
+        return imagecopymerge(
+            $destinationImage,
+            $cut,
+            $destinationX,
+            $destinationY,
+            0,
+            0,
+            $sourceWidth,
+            $sourceHeight,
+            $percent
+        );
     }
 }

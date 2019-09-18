@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,18 @@ namespace Communitales\Component\Image\Filter;
 
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
+use function abs;
+use function imagecolorallocate;
+use function imagecolorat;
+use function imageconvolution;
+use function imagecreatetruecolor;
+use function imagedestroy;
+use function imagesetpixel;
+use function imagesx;
+use function imagesy;
+use function max;
+use function min;
+use function round;
 
 /**
  * Unsharp Mask for PHP - version 2.1.1
@@ -84,15 +96,15 @@ class UnsharpMaskFilter implements FilterInterface
             $threshold = 255;
         }
 
-        $radius = \abs(\round($radius)); // Only integers make sense.
+        $radius = abs(round($radius)); // Only integers make sense.
         if ($radius === 0) {
             return false;
         }
 
-        $w = \imagesx($img);
-        $h = \imagesy($img);
-        $imgCanvas = \imagecreatetruecolor($w, $h);
-        $imgBlur = \imagecreatetruecolor($w, $h);
+        $w = imagesx($img);
+        $h = imagesy($img);
+        $imgCanvas = imagecreatetruecolor($w, $h);
+        $imgBlur = imagecreatetruecolor($w, $h);
 
         // Gaussian blur matrix:
         //
@@ -107,8 +119,8 @@ class UnsharpMaskFilter implements FilterInterface
             [2, 4, 2],
             [1, 2, 1],
         ];
-        \imagecopy($imgBlur, $img, 0, 0, 0, 0, $w, $h);
-        \imageconvolution($imgBlur, $matrix, 16, 0);
+        imagecopy($imgBlur, $img, 0, 0, 0, 0, $w, $h);
+        imageconvolution($imgBlur, $matrix, 16, 0);
 
         if ($threshold > 0) {
             // Calculate the difference between the blurred pixels and the original
@@ -116,12 +128,12 @@ class UnsharpMaskFilter implements FilterInterface
             for ($x = 0; $x < $w - 1; $x++) { // each row
                 for ($y = 0; $y < $h; $y++) { // each pixel
 
-                    $rgbOrig = \imagecolorat($img, $x, $y);
+                    $rgbOrig = imagecolorat($img, $x, $y);
                     $rOrig = (($rgbOrig >> 16) & 0xFF);
                     $gOrig = (($rgbOrig >> 8) & 0xFF);
                     $bOrig = ($rgbOrig & 0xFF);
 
-                    $rgbBlur = \imagecolorat($imgBlur, $x, $y);
+                    $rgbBlur = imagecolorat($imgBlur, $x, $y);
 
                     $rBlur = (($rgbBlur >> 16) & 0xFF);
                     $gBlur = (($rgbBlur >> 8) & 0xFF);
@@ -129,31 +141,31 @@ class UnsharpMaskFilter implements FilterInterface
 
                     // When the masked pixels differ less from the original
                     // than the threshold specifies, they are set to their original value.
-                    $rNew = (\abs($rOrig - $rBlur) >= $threshold)
-                        ? \max(0, \min(255, ($amount * ($rOrig - $rBlur)) + $rOrig))
+                    $rNew = (abs($rOrig - $rBlur) >= $threshold)
+                        ? max(0, min(255, ($amount * ($rOrig - $rBlur)) + $rOrig))
                         : $rOrig;
-                    $gNew = (\abs($gOrig - $gBlur) >= $threshold)
-                        ? \max(0, \min(255, ($amount * ($gOrig - $gBlur)) + $gOrig))
+                    $gNew = (abs($gOrig - $gBlur) >= $threshold)
+                        ? max(0, min(255, ($amount * ($gOrig - $gBlur)) + $gOrig))
                         : $gOrig;
-                    $bNew = (\abs($bOrig - $bBlur) >= $threshold)
-                        ? \max(0, \min(255, ($amount * ($bOrig - $bBlur)) + $bOrig))
+                    $bNew = (abs($bOrig - $bBlur) >= $threshold)
+                        ? max(0, min(255, ($amount * ($bOrig - $bBlur)) + $bOrig))
                         : $bOrig;
 
                     if (($rOrig !== $rNew) || ($gOrig !== $gNew) || ($bOrig !== $bNew)) {
-                        $pixCol = \imagecolorallocate($img, $rNew, $gNew, $bNew);
-                        \imagesetpixel($img, $x, $y, $pixCol);
+                        $pixCol = imagecolorallocate($img, $rNew, $gNew, $bNew);
+                        imagesetpixel($img, $x, $y, $pixCol);
                     }
                 }
             }
         } else {
             for ($x = 0; $x < $w; $x++) { // each row
                 for ($y = 0; $y < $h; $y++) { // each pixel
-                    $rgbOrig = \imagecolorat($img, $x, $y);
+                    $rgbOrig = imagecolorat($img, $x, $y);
                     $rOrig = (($rgbOrig >> 16) & 0xFF);
                     $gOrig = (($rgbOrig >> 8) & 0xFF);
                     $bOrig = ($rgbOrig & 0xFF);
 
-                    $rgbBlur = \imagecolorat($imgBlur, $x, $y);
+                    $rgbBlur = imagecolorat($imgBlur, $x, $y);
 
                     $rBlur = (($rgbBlur >> 16) & 0xFF);
                     $gBlur = (($rgbBlur >> 8) & 0xFF);
@@ -178,12 +190,12 @@ class UnsharpMaskFilter implements FilterInterface
                         $bNew = 0;
                     }
                     $rgbNew = ($rNew << 16) + ($gNew << 8) + $bNew;
-                    \imagesetpixel($img, $x, $y, $rgbNew);
+                    imagesetpixel($img, $x, $y, $rgbNew);
                 }
             }
         }
-        \imagedestroy($imgCanvas);
-        \imagedestroy($imgBlur);
+        imagedestroy($imgCanvas);
+        imagedestroy($imgBlur);
 
         $image->setResource($img);
 

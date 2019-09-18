@@ -6,12 +6,13 @@
     "homepage": "https://www.communitales.com",
     "license": "MIT",
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.2",
         "ext-gd": "*",
         "ext-exif": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.5"
+        "phpunit/phpunit": "^8.3",
+        "sllh/composer-versions-check": "^2.0"
     },
     "autoload": {
         "psr-4": { "Communitales\\Component\\Image\\": "src/Image" },

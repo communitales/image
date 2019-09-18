@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (http://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,7 @@ namespace Communitales\Component\Image\Action;
 
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
+use function imagerotate;
 
 /**
  * Rotate an image
@@ -40,7 +41,7 @@ class RotateAction implements ActionInterface
         $ignoreTransparent = $options[self::OPTION_IGNORE_TRANSPARENT] ?? 0;
 
         $resource = $image->getResource();
-        $resource = \imagerotate($resource, $angle, $backgroundColor, $ignoreTransparent);
+        $resource = imagerotate($resource, $angle, $backgroundColor, $ignoreTransparent);
 
         if ($resource === false) {
             return false;
