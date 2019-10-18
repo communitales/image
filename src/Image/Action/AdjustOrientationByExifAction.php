@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -44,8 +44,6 @@ class AdjustOrientationByExifAction implements ActionInterface
         }
 
         switch ($exif[self::EXIF_ORIENTATION]) {
-            case self::ORIENTATION_NORMAL:
-                break;
             case self::ORIENTATION_180:
                 $image->addAction(new RotateAction(), [RotateAction::OPTION_ANGLE => 180]);
                 break;
@@ -56,10 +54,9 @@ class AdjustOrientationByExifAction implements ActionInterface
                 $image->addAction(new RotateAction(), [RotateAction::OPTION_ANGLE => 90]);
                 break;
 
+            case self::ORIENTATION_NORMAL:
             default:
-                throw new InvalidArgumentException(
-                    'Not supported orientation found: '.$exif[self::EXIF_ORIENTATION]
-                );
+                // Some cameras (e.g. Android Samsung devices) may set a orientation of 0
                 break;
         }
 
