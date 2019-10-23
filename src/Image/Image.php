@@ -27,7 +27,6 @@ use function imagesavealpha;
 use function imagesx;
 use function imagesy;
 use function sprintf;
-use function strtolower;
 
 /**
  * Represents an image resource.
@@ -72,20 +71,24 @@ class Image
      */
     public static function createFromFilename(string $filename): Image
     {
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-        $extension = strtolower($extension);
+        if (!file_exists($filename)) {
+            throw new  RuntimeException(
+                sprintf('The image was not found or is not readable: "%s"', $filename)
+            );
+        }
 
-        switch ($extension) {
-            case 'jpg':
-            case 'jpeg':
+        $imageType = exif_imagetype($filename);
+
+        switch ($imageType) {
+            case IMAGETYPE_JPEG:
                 return self::createFromJpeg($filename);
-            case 'png':
+            case IMAGETYPE_PNG:
                 return self::createFromPng($filename);
             default:
                 throw new InvalidArgumentException(
                     sprintf(
-                        'There is no implemented loading function for the extension "%s". Supported types: jpg, jpeg, png.',
-                        $extension
+                        'There is no implemented loading function for the type "%s". Supported types: jpeg, png.',
+                        image_type_to_mime_type($imageType)
                     )
                 );
                 break;
@@ -183,7 +186,9 @@ class Image
     {
         $exif = [];
         if (!empty($this->filename)) {
-            $exif = exif_read_data($this->filename);
+            // Suppress warning
+            // See: PHP Bug #78083 exif_read_data() corrupt EXIF header: maximum directory nesting level reached
+            $exif = @exif_read_data($this->filename);
         }
         if ($exif === false) {
             $exif = [];
