@@ -14,7 +14,6 @@ use Communitales\Component\Image\Action\AdjustOrientationByExifAction;
 use Communitales\Component\Image\Filter\FilterInterface;
 use InvalidArgumentException;
 use RuntimeException;
-use function array_pop;
 use function exif_read_data;
 use function file_exists;
 use function imagecolorallocatealpha;
@@ -28,6 +27,7 @@ use function imagesavealpha;
 use function imagesx;
 use function imagesy;
 use function sprintf;
+use function strtolower;
 
 /**
  * Represents an image resource.
@@ -72,8 +72,9 @@ class Image
      */
     public static function createFromFilename(string $filename): Image
     {
-        $nameSplit = explode('.', $filename);
-        $extension = array_pop($nameSplit);
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $extension = strtolower($extension);
+
         switch ($extension) {
             case 'jpg':
             case 'jpeg':
