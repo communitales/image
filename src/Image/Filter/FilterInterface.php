@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,8 +20,8 @@ interface FilterInterface
     /**
      * Apply a filter to an image
      *
-     * @param Image $image
-     * @param array $options List of options
+     * @param Image                $image
+     * @param array<string, mixed> $options List of options
      *
      * @return bool True if successful, else false.
      */

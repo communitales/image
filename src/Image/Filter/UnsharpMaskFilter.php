@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,6 +9,7 @@
 
 namespace Communitales\Component\Image\Filter;
 
+use Communitales\Component\Image\Exception\GdException;
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
 use function abs;
@@ -49,6 +50,11 @@ use function round;
  */
 class UnsharpMaskFilter implements FilterInterface
 {
+
+    public const OPTION_AMOUNT = 'amount';
+    public const OPTION_RADIUS = 'radius';
+    public const OPTION_THRESHOLD = 'threshold';
+
     /**
      * The Amount parameter simply says how much of the effect you want.
      * 100 is 'normal'.
@@ -63,10 +69,11 @@ class UnsharpMaskFilter implements FilterInterface
      * are treated normally. This is good for pictures of e.g. skin or blue skies.
      * (typically 0 - 5)
      *
-     * @param Image $image
-     * @param array $options amount, radius, threshold
+     * @param Image                $image
+     * @param array<string, mixed> $options amount, radius, threshold
      *
      * @return bool
+     * @throws GdException
      */
     public function process(Image $image, array $options = []): bool
     {
@@ -75,9 +82,9 @@ class UnsharpMaskFilter implements FilterInterface
                 'Not all required parameters where set. Required: amount, radius, threshold.'
             );
         }
-        $amount = $options['amount'];
-        $radius = $options['radius'];
-        $threshold = $options['threshold'];
+        $amount = (float)$options[self::OPTION_AMOUNT];
+        $radius = (float)$options[self::OPTION_RADIUS];
+        $threshold = (int)$options[self::OPTION_THRESHOLD];
         $img = $image->getResource();
 
         // $img is an image that is already created within php using
@@ -96,15 +103,23 @@ class UnsharpMaskFilter implements FilterInterface
             $threshold = 255;
         }
 
-        $radius = abs(round($radius)); // Only integers make sense.
+        $radius = (int)abs(round($radius)); // Only integers make sense.
         if ($radius === 0) {
             return false;
         }
 
         $w = imagesx($img);
         $h = imagesy($img);
+
         $imgCanvas = imagecreatetruecolor($w, $h);
+        if ($imgCanvas === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
+
         $imgBlur = imagecreatetruecolor($w, $h);
+        if ($imgBlur === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
 
         // Gaussian blur matrix:
         //
@@ -152,7 +167,12 @@ class UnsharpMaskFilter implements FilterInterface
                         : $bOrig;
 
                     if (($rOrig !== $rNew) || ($gOrig !== $gNew) || ($bOrig !== $bNew)) {
-                        $pixCol = imagecolorallocate($img, $rNew, $gNew, $bNew);
+                        /** @var int|false $pixCol */
+                        $pixCol = imagecolorallocate($img, (int)$rNew, (int)$gNew, (int)$bNew);
+                        if ($pixCol === false) {
+                            return false;
+                        }
+
                         imagesetpixel($img, $x, $y, $pixCol);
                     }
                 }
@@ -160,12 +180,21 @@ class UnsharpMaskFilter implements FilterInterface
         } else {
             for ($x = 0; $x < $w; $x++) { // each row
                 for ($y = 0; $y < $h; $y++) { // each pixel
+                    /** @var false|int $rgbOrig */
                     $rgbOrig = imagecolorat($img, $x, $y);
+                    if ($rgbOrig === false) {
+                        return false;
+                    }
+
                     $rOrig = (($rgbOrig >> 16) & 0xFF);
                     $gOrig = (($rgbOrig >> 8) & 0xFF);
                     $bOrig = ($rgbOrig & 0xFF);
 
+                    /** @var false|int $rgbBlur */
                     $rgbBlur = imagecolorat($imgBlur, $x, $y);
+                    if ($rgbBlur === false) {
+                        return false;
+                    }
 
                     $rBlur = (($rgbBlur >> 16) & 0xFF);
                     $gBlur = (($rgbBlur >> 8) & 0xFF);
@@ -190,7 +219,7 @@ class UnsharpMaskFilter implements FilterInterface
                         $bNew = 0;
                     }
                     $rgbNew = ($rNew << 16) + ($gNew << 8) + $bNew;
-                    imagesetpixel($img, $x, $y, $rgbNew);
+                    imagesetpixel($img, $x, $y, (int)$rgbNew);
                 }
             }
         }

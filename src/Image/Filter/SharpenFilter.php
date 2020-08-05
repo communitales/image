@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -26,7 +26,7 @@ class SharpenFilter implements FilterInterface
     public const TYPE_SMOOTH = 1;
 
     /**
-     * @var array
+     * @var array<array-key, array<array-key, float[]>>
      */
     private $sharpenMatrix = [
         [
@@ -42,15 +42,15 @@ class SharpenFilter implements FilterInterface
     ];
 
     /**
-     * @param Image $image
-     * @param array $options List of options [type = {NORMAL,SMOOTH}]
+     * @param Image                $image
+     * @param array<string, mixed> $options List of options [type = {NORMAL,SMOOTH}]
      *
      * @return bool
      */
     public function process(Image $image, array $options = []): bool
     {
         $imageResource = $image->getResource();
-        $type = $options[self::OPTION_TYPE] ?? self::TYPE_SMOOTH;
+        $type = $options[self::OPTION_TYPE] === 1 ? $options[self::OPTION_TYPE] : self::TYPE_SMOOTH;
         $sharpenMatrix = $this->sharpenMatrix[$type];
         $offset = 0;
 

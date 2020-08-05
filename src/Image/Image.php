@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,8 @@ namespace Communitales\Component\Image;
 
 use Communitales\Component\Image\Action\ActionInterface;
 use Communitales\Component\Image\Action\AdjustOrientationByExifAction;
+use Communitales\Component\Image\Exception\GdException;
+use Communitales\Component\Image\Exception\ImageCreateException;
 use Communitales\Component\Image\Filter\FilterInterface;
 use InvalidArgumentException;
 use RuntimeException;
@@ -68,6 +70,7 @@ class Image
      *
      * @return Image
      * @throws InvalidArgumentException
+     * @throws GdException
      */
     public static function createFromFilename(string $filename): Image
     {
@@ -78,6 +81,9 @@ class Image
         }
 
         $imageType = exif_imagetype($filename);
+        if ($imageType === false) {
+            throw new GdException('Could not detect image type');
+        }
 
         switch ($imageType) {
             case IMAGETYPE_JPEG:
@@ -91,7 +97,6 @@ class Image
                         image_type_to_mime_type($imageType)
                     )
                 );
-                break;
         }
     }
 
@@ -101,17 +106,20 @@ class Image
      * @param string $filename
      *
      * @return Image
-     * @throws RuntimeException
+     * @throws ImageCreateException
      */
     public static function createFromPng(string $filename): Image
     {
         if (!file_exists($filename)) {
-            throw new  RuntimeException(
+            throw new  ImageCreateException(
                 sprintf('The image was not found or is not readable: "%s"', $filename)
             );
         }
 
         $resource = imagecreatefrompng($filename);
+        if ($resource === false) {
+            throw new ImageCreateException('Error when reading the png image');
+        }
 
         return new self($resource, $filename);
     }
@@ -123,17 +131,21 @@ class Image
      * @param string $filename
      *
      * @return Image
-     * @throws RuntimeException
+     * @throws ImageCreateException
      */
     public static function createFromJpeg(string $filename): Image
     {
         if (!file_exists($filename)) {
-            throw new  RuntimeException(
+            throw new  ImageCreateException(
                 sprintf('The image was not found or is not readable: "%s"', $filename)
             );
         }
 
         $resource = imagecreatefromjpeg($filename);
+        if ($resource === false) {
+            throw new ImageCreateException('Error when reading the png image');
+        }
+
         $image = new self($resource, $filename);
         $image->addAction(new AdjustOrientationByExifAction());
 
@@ -147,10 +159,14 @@ class Image
      * @param int $height
      *
      * @return Image
+     * @throws GdException
      */
     public static function createTrueColor(int $width, int $height): Image
     {
         $resource = imagecreatetruecolor($width, $height);
+        if ($resource === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
 
         return new self($resource);
     }
@@ -165,7 +181,7 @@ class Image
      * @param int   $alpha A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely
      *                     transparent.
      *
-     * @return int  A color identifier or FALSE if the allocation failed.
+     * @return int|false A color identifier or false if the allocation failed.
      */
     public static function allocateColor(
         Image $image,
@@ -173,14 +189,17 @@ class Image
         int $green,
         int $blue,
         int $alpha = 0
-    ): int {
-        return imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
+    ) {
+        /** @var int|false $result */
+        $result = imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
+
+        return $result;
     }
 
     /**
      * Returns the exif data of an image, when existing.
      *
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function getExifData(): array
     {
@@ -200,8 +219,8 @@ class Image
     /**
      * Apply a filter to the image
      *
-     * @param FilterInterface $filter
-     * @param array           $options
+     * @param FilterInterface      $filter
+     * @param array<string, mixed> $options
      *
      * @return bool
      */
@@ -213,8 +232,8 @@ class Image
     /**
      * Process an action on the image
      *
-     * @param ActionInterface $action
-     * @param array           $options
+     * @param ActionInterface      $action
+     * @param array<string, mixed> $options
      *
      * @return bool
      */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,6 +9,7 @@
 
 namespace Communitales\Component\Image\Action;
 
+use Communitales\Component\Image\Exception\GdException;
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
 use function imagecopy;
@@ -45,10 +46,11 @@ class CropAction implements ActionInterface
     public const CROP_FROM_RIGHT_BOTTOM = 9;
 
     /**
-     * @param Image $image
-     * @param array $options
+     * @param Image                $image
+     * @param array<string, mixed> $options
      *
      * @return bool
+     * @throws GdException
      */
     public function process(Image $image, array $options = []): bool
     {
@@ -72,6 +74,9 @@ class CropAction implements ActionInterface
         $targetY = $this->getTargetPositionY($imageHeight, $height, $orientation);
 
         $cropedResource = imagecreatetruecolor($width, $height);
+        if ($cropedResource === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
 
         // If a fill color was added, then fill the new image
         if (isset($options[self::OPTION_COLOR]) && \is_int($options[self::OPTION_COLOR])) {

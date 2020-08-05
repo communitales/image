@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -24,10 +24,10 @@ class RotateAction implements ActionInterface
     public const OPTION_IGNORE_TRANSPARENT = 'ignoreTransparent';
 
     /**
-     * @param Image $image
-     * @param array $options angle -360 to 360
-     *                       backgroundColor (default: 0)
-     *                       ignoreTransparent (default: false)
+     * @param Image                $image
+     * @param array<string, mixed> $options angle -360 to 360
+     *                                      backgroundColor (default: 0)
+     *                                      ignoreTransparent (default: false)
      *
      * @return bool True if successful, else false.
      */
@@ -36,13 +36,13 @@ class RotateAction implements ActionInterface
         if (!isset($options[self::OPTION_ANGLE])) {
             throw new InvalidArgumentException('Some options are missing. Mandatory options: angle');
         }
-        $angle = $options[self::OPTION_ANGLE];
-        $backgroundColor = $options[self::OPTION_BACKGROUND_COLOR] ?? 0;
-        $ignoreTransparent = $options[self::OPTION_IGNORE_TRANSPARENT] ?? 0;
+        $angle = (float)$options[self::OPTION_ANGLE];
+        $backgroundColor = (int)($options[self::OPTION_BACKGROUND_COLOR] ?? 0);
+        $ignoreTransparent = (int)($options[self::OPTION_IGNORE_TRANSPARENT] ?? 0);
 
         $resource = $image->getResource();
+        /** @var false|resource $resource */
         $resource = imagerotate($resource, $angle, $backgroundColor, $ignoreTransparent);
-
         if ($resource === false) {
             return false;
         }

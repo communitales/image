@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -10,7 +10,6 @@
 namespace Communitales\Component\Image\Action;
 
 use Communitales\Component\Image\Image;
-use InvalidArgumentException;
 
 /**
  * Automatically adjust the image rotation based on the exif data
@@ -29,8 +28,8 @@ class AdjustOrientationByExifAction implements ActionInterface
     /**
      * Rotate the image
      *
-     * @param Image $image
-     * @param array $options Not used
+     * @param Image                $image
+     * @param array<string, mixed> $options Unused
      *
      * @return bool True if successful, else false.
      */
@@ -38,7 +37,7 @@ class AdjustOrientationByExifAction implements ActionInterface
     {
         $exif = $image->getExifData();
 
-        // No exif data, nothing work :)
+        // No exif data, nothing to do :)
         if (!isset($exif[self::EXIF_ORIENTATION])) {
             return false;
         }

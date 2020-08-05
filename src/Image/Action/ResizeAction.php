@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2018 - 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2018 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,6 +9,7 @@
 
 namespace Communitales\Component\Image\Action;
 
+use Communitales\Component\Image\Exception\GdException;
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
 use function imagecopyresampled;
@@ -27,12 +28,13 @@ class ResizeAction implements ActionInterface
     public const OPTION_KEEP_ASPECT_RATIO = 'keepAspectRatio';
 
     /**
-     * @param Image $image   Bildresource
-     * @param array $options width
-     *                       height
-     *                       keepAspectRatio (default: true)
+     * @param Image                $image   Bildresource
+     * @param array<string, mixed> $options width
+     *                                      height
+     *                                      keepAspectRatio (default: true)
      *
      * @return bool Sagt ob die Action erfolgreich angewendet wurde
+     * @throws GdException
      */
     public function process(Image $image, array $options = []): bool
     {
@@ -55,8 +57,8 @@ class ResizeAction implements ActionInterface
         // Calculate real target size
         if ($keepAspectRatio) {
             $factor = min($width / $imageWidth, $height / $imageHeight);
-            $width = round($imageWidth * $factor);
-            $height = round($imageHeight * $factor);
+            $width = (int)round($imageWidth * $factor);
+            $height = (int)round($imageHeight * $factor);
         }
 
         // If the image already has the desired size, we are done.
@@ -66,6 +68,9 @@ class ResizeAction implements ActionInterface
 
         // Now resize to the new image
         $resizedResource = imagecreatetruecolor($width, $height);
+        if ($resizedResource === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
         imagecopyresampled($resizedResource, $resource, 0, 0, 0, 0, $width, $height, $imageWidth, $imageHeight);
 
         $image->setResource($resizedResource);

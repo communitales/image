@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright   Copyright (c) 2019 Communitales GmbH (https://www.communitales.com/)
+ * @copyright   Copyright (c) 2019 - 2020 Communitales GmbH (https://www.communitales.com/)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,6 +9,7 @@
 
 namespace Communitales\Component\Image\Action;
 
+use Communitales\Component\Image\Exception\GdException;
 use Communitales\Component\Image\Image;
 use InvalidArgumentException;
 use function imagecopy;
@@ -28,8 +29,8 @@ class CopyAction implements ActionInterface
     public const OPTION_OPACITY = 'opacity'; // 0 - 100, 0 = none, 100 = full
 
     /**
-     * @param Image $image
-     * @param array $options
+     * @param Image                $image
+     * @param array<string, mixed> $options
      *
      * @return bool
      */
@@ -81,6 +82,7 @@ class CopyAction implements ActionInterface
      * @param int      $percent
      *
      * @return bool
+     * @throws GdException
      */
     private function imageCopyMergeAlpha(
         $destinationImage,
@@ -95,6 +97,9 @@ class CopyAction implements ActionInterface
     ): bool {
         // creating a cut resource
         $cut = imagecreatetruecolor($sourceWidth, $sourceHeight);
+        if ($cut === false) {
+            throw new GdException('Error when using imagecreatetruecolor');
+        }
 
         // copying relevant section from background to the cut resource
         imagecopy($cut, $destinationImage, 0, 0, $destinationX, $destinationY, $sourceWidth, $sourceHeight);

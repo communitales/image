@@ -1,28 +1,42 @@
 {
     "name": "communitales/image",
     "description": "Communitales Image Component",
-    "keywords": ["image", "php"],
+    "keywords": [
+        "image",
+        "php"
+    ],
     "type": "library",
     "homepage": "https://www.communitales.com",
     "license": "MIT",
     "require": {
-        "php": "^7.2",
+        "php": ">=7.2.5",
         "ext-gd": "*",
         "ext-exif": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.4",
-        "sllh/composer-versions-check": "^2.0"
+        "phpstan/phpstan": "^0.12.36",
+        "phpstan/phpstan-deprecation-rules": "^0.12.5",
+        "phpstan/phpstan-phpunit": "^0.12.16",
+        "phpunit/phpunit": "^9.2",
+        "sllh/composer-versions-check": "^2.0",
+        "vimeo/psalm": "^3.13"
     },
     "autoload": {
-        "psr-4": { "Communitales\\Component\\Image\\": "src/Image" },
+        "psr-4": {
+            "Communitales\\Component\\Image\\": "src/Image"
+        },
         "exclude-from-classmap": [
-            "/Tests/"
+            "/tests/"
         ]
+    },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse -c phpstan.dev.neon > docs/TODO-phpstan.md",
+        "psalm": "vendor/bin/psalm -m > docs/TODO-psalm.md",
+        "test": "vendor/bin/phpunit"
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.3-dev"
         }
     }
 }
