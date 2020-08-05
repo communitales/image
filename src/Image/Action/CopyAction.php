@@ -33,6 +33,7 @@ class CopyAction implements ActionInterface
      * @param array<string, mixed> $options
      *
      * @return bool
+     * @throws GdException
      */
     public function process(Image $image, array $options = []): bool
     {

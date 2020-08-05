@@ -69,8 +69,8 @@ class Image
      * @param string $filename
      *
      * @return Image
-     * @throws InvalidArgumentException
      * @throws GdException
+     * @throws ImageCreateException
      */
     public static function createFromFilename(string $filename): Image
     {

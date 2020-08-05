@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use function imagecopy;
 use function imagecreatetruecolor;
 use function imagefilledrectangle;
+use function is_int;
 use function round;
 
 /**
@@ -79,7 +80,7 @@ class CropAction implements ActionInterface
         }
 
         // If a fill color was added, then fill the new image
-        if (isset($options[self::OPTION_COLOR]) && \is_int($options[self::OPTION_COLOR])) {
+        if (isset($options[self::OPTION_COLOR]) && is_int($options[self::OPTION_COLOR])) {
             imagefilledrectangle($cropedResource, 0, 0, $width, $height, $options[self::OPTION_COLOR]);
         }
 
