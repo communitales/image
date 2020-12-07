@@ -143,7 +143,7 @@ class Image
 
         $resource = imagecreatefromjpeg($filename);
         if ($resource === false) {
-            throw new ImageCreateException('Error when reading the png image');
+            throw new ImageCreateException('Error when reading the jpeg image');
         }
 
         $image = new self($resource, $filename);

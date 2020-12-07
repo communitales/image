@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+1.3.1
+-----
+
+* Fixed: Typo in exception message
+
+
 1.3.0
 -----
 
