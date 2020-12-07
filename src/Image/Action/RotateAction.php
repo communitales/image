@@ -21,7 +21,6 @@ class RotateAction implements ActionInterface
 
     public const OPTION_ANGLE = 'angle';
     public const OPTION_BACKGROUND_COLOR = 'backgroundColor';
-    public const OPTION_IGNORE_TRANSPARENT = 'ignoreTransparent';
 
     /**
      * @param Image                $image
@@ -38,11 +37,9 @@ class RotateAction implements ActionInterface
         }
         $angle = (float)$options[self::OPTION_ANGLE];
         $backgroundColor = (int)($options[self::OPTION_BACKGROUND_COLOR] ?? 0);
-        $ignoreTransparent = (int)($options[self::OPTION_IGNORE_TRANSPARENT] ?? 0);
 
         $resource = $image->getResource();
-        /** @var false|resource $resource */
-        $resource = imagerotate($resource, $angle, $backgroundColor, $ignoreTransparent);
+        $resource = imagerotate($resource, $angle, $backgroundColor);
         if ($resource === false) {
             return false;
         }

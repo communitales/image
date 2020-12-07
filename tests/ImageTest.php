@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+use Communitales\Component\Image\Exception\GdException;
 use Communitales\Component\Image\Image;
 use PHPUnit\Framework\TestCase;
 
@@ -16,6 +17,9 @@ use PHPUnit\Framework\TestCase;
 class ImageTest extends TestCase
 {
 
+    /**
+     * @throws GdException
+     */
     public function testCreateTrueColor(): void
     {
         $image = Image::createTrueColor(10, 10);

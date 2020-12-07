@@ -72,8 +72,8 @@ class CopyAction implements ActionInterface
      * Also, inverting opacity is not necessary.)
      * 08-JAN-2011
      *
-     * @param resource $destinationImage
-     * @param resource $sourceImage
+     * @param \GdImage $destinationImage
+     * @param \GdImage $sourceImage
      * @param int      $destinationX
      * @param int      $destinationY
      * @param int      $sourceX

@@ -38,7 +38,7 @@ use function sprintf;
 class Image
 {
     /**
-     * @var resource
+     * @var \GdImage
      */
     private $resource;
 
@@ -53,7 +53,7 @@ class Image
      * Create an adapter for a graphics resource.
      * See static create functions.
      *
-     * @param resource $resource
+     * @param \GdImage $resource
      * @param string   $filename
      */
     public function __construct($resource, string $filename = '')
@@ -190,10 +190,7 @@ class Image
         int $blue,
         int $alpha = 0
     ) {
-        /** @var int|false $result */
-        $result = imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
-
-        return $result;
+        return imagecolorallocatealpha($image->getResource(), $red, $green, $blue, $alpha);
     }
 
     /**
@@ -252,7 +249,7 @@ class Image
      */
     public function saveAsJpeg(string $targetFilename, int $quality = 98): bool
     {
-        return imagejpeg($this->resource, $targetFilename, $quality);
+        return (bool)imagejpeg($this->resource, $targetFilename, $quality);
     }
 
     /**
@@ -294,7 +291,7 @@ class Image
     }
 
     /**
-     * @param resource $resource
+     * @param \GdImage $resource
      *
      * @return Image
      */
@@ -308,7 +305,7 @@ class Image
     /**
      * Return the internal image resource
      *
-     * @return resource
+     * @return \GdImage
      */
     public function getResource()
     {
